@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import pickle
 
-# Load model
 with open("wine_model.pkl", "rb") as f:
     model = pickle.load(f)
 
@@ -13,7 +12,6 @@ We'll predict the **quality score** and tell you if it's a **Good** or **Bad** w
 along with confidence scores for each.
 """)
 
-# Input sliders
 fixed_acidity        = st.slider("Fixed Acidity",        4.0, 16.0,  8.0)
 volatile_acidity     = st.slider("Volatile Acidity",     0.1,  1.5,  0.5)
 citric_acid          = st.slider("Citric Acid",          0.0,  1.0,  0.3)
@@ -26,10 +24,7 @@ pH                   = st.slider("pH",                   2.5,  4.5,  3.3)
 sulphates            = st.slider("Sulphates",             0.3,  2.0,  0.6)
 alcohol              = st.slider("Alcohol %",            8.0, 15.0, 10.0)
 
-# Dummy Id to match training
 dummy_id = 0
-
-# Build the DataFrame for prediction
 input_data = pd.DataFrame(
     [[fixed_acidity, volatile_acidity, citric_acid, residual_sugar, chlorides,
       free_sulfur_dioxide, total_sulfur_dioxide, density, pH, sulphates,
@@ -42,21 +37,13 @@ input_data = pd.DataFrame(
 )
 
 if st.button("Predict"):
-    # Raw prediction
     pred_score = model.predict(input_data)[0]
-
-    # Class-probabilities array, e.g. [P(score=3), P(score=4), ..., P(score=9)]
     proba = model.predict_proba(input_data)[0]
     classes = model.classes_
-
-    # Sum probabilities for "good" (score ≥ 6) and "bad" (score < 6)
     good_prob = proba[classes >= 6].sum()
     bad_prob  = proba[classes <  6].sum()
-
-    # Label based on predicted score
     label = "👍 Good Quality" if pred_score >= 6 else "👎 Bad Quality"
 
-    # Display results
     st.subheader("🍷 Prediction Result")
     st.write(f"**Predicted Quality Score:** `{pred_score}`")
     st.write(f"**Classification:** {label}")
